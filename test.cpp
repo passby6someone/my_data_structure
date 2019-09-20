@@ -26,6 +26,8 @@ class LinkList{
         // template <typename Status>
         // Status mdzz(ElemType);
         InitList();
+        template <typename Status>
+        Status ClearList(LinkList<ElemType> &L);
 };
 template <typename ElemType>
 LinkList<ElemType>::InitList(){
@@ -38,8 +40,11 @@ template <typename Status,typename ElemType>
 Status DestoryList(LinkList<ElemType> *&L){
     delete L;
 }
-template <typename Status,typename ElemType>
-Status ClearList(LinkList<ElemType> &L){
+
+
+template <typename ElemType>
+template <typename Status>
+Status LinkList<ElemType>::ClearList(LinkList<ElemType> &L){
     LNode<ElemType> *tmp=NULL;
     while(L.tail!=L.head){
         tmp=L.head;
@@ -50,6 +55,10 @@ Status ClearList(LinkList<ElemType> &L){
     delete L.head;
     L.tail=L.head=NULL;
 }
+
+
+
+
 template <typename Status,typename ElemType>
 Status InsFirst(LinkList<ElemType> *h,LNode<ElemType> *s){
     if(h->head!=NULL){
@@ -72,12 +81,13 @@ Status PrintList(LinkList<ElemType> List);
 int main(){
     int i=666;
     LinkList<int> *List=new LinkList<int> ;
+    // List->mdzz();
     LNode<int> *node=new LNode<int>;
     node->data=23;
     // cout<<InitList<int>(List)<<endl;
     InsFirst<void,int>(List,node);
     InsFirst<void,int>(List,node);
-    ClearList<void,int>(*List);
+    List->ClearList<void>(*List);
     DestoryList<void,int>(List);
     cin>>i;
     return 0;
