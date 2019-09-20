@@ -22,10 +22,10 @@ class LinkList{
     public:
         int len;
         LNode<ElemType> *head,*tail;
+        //just a demo
+        // template <typename Status>
+        // Status mdzz(ElemType);
         InitList();
-        template <typename Status,typename T>
-        Status ClearList(ElemType);
-
 };
 template <typename ElemType>
 LinkList<ElemType>::InitList(){
@@ -34,15 +34,13 @@ LinkList<ElemType>::InitList(){
     this.tail=this.head;
 };
 
-
 template <typename Status,typename ElemType>
 Status DestoryList(LinkList<ElemType> *&L){
     delete L;
 }
-template <typename ElemType>
-template <typename Status,typename T>
-Status LinkList<ElemType>::ClearList(LinkList<ElemType> &L){
-    LNode<T> *tmp=NULL;
+template <typename Status,typename ElemType>
+Status ClearList(LinkList<ElemType> &L){
+    LNode<ElemType> *tmp=NULL;
     while(L.tail!=L.head){
         tmp=L.head;
         L.head=L.head->next;
@@ -54,18 +52,19 @@ Status LinkList<ElemType>::ClearList(LinkList<ElemType> &L){
 }
 template <typename Status,typename ElemType>
 Status InsFirst(LinkList<ElemType> *h,LNode<ElemType> *s){
-    if(h!=NULL){
-        LNode<ElemType> *node=h;
-        h=s;
+    if(h->head!=NULL){
+        LNode<ElemType> *node=h->head;
+        h->head=s;
         s->next=node;
     }
     else{
-        h=s;
+        h->head=s;
+        h->tail=s;
     }
 }
 template <typename Status,typename ElemType>
 Status Append(LinkList<ElemType> L,LNode<ElemType> s){
-
+    
 }
 template <typename Status,typename ElemType>
 Status PrintList(LinkList<ElemType> List);
@@ -76,9 +75,9 @@ int main(){
     LNode<int> *node=new LNode<int>;
     node->data=23;
     // cout<<InitList<int>(List)<<endl;
-    InsFirst<void,int>(List->head,node);
-    InsFirst<void,int>(List->head,node);
-    List->ClearList<void>(*List);
+    InsFirst<void,int>(List,node);
+    InsFirst<void,int>(List,node);
+    ClearList<void,int>(*List);
     DestoryList<void,int>(List);
     cin>>i;
     return 0;
