@@ -19,6 +19,10 @@
     btw
     错误判断try catch还没写
 */
+/*
+    有些函数未涉及引用，但是我按书上加了引用没改
+    现在觉得改起来太麻烦了，算了
+*/
 
 #include<stdlib.h>
 #include<stdio.h>
@@ -62,9 +66,31 @@ class LinkList{
         template <typename Status>
         Status InsFirst(LNode<ElemType> *s);
         template <typename Status>
+        Status DelFirst(LNode<ElemType> &q);
+        template <typename Status>
         Status Append(LNode<ElemType> *s);
         template <typename Status>
         Status PrintList();
+        template <typename Status>
+        Status Remove(LNode<ElemType> &p);
+        template <typename Status>
+        Status InsBefore(LNode<ElemType> *&p,LNode<ElemType> s);
+        template <typename Status>
+        Status InsAfter(LNode<ElemType> *&p,LNode<ElemType> s);
+        template <typename Status>
+        Status SetCurElem(LNode<ElemType> *&p,ElemType e);
+        ElemType GetCurElem(LNode<ElemType> *p);
+        template <typename Status>
+        Status ListEmpty();
+        int ListLength();
+        template <typename Position>
+        Position PriorPos(LNode<ElemType> p);
+        template <typename Position>
+        Position NextPos(LNode<ElemType> p);
+        template <typename Status>
+        Status LocatePos(int i,LNode<ElemType> *&q);
+        template <typename Status,typename FunType>
+        Status LocateElem(ElemType e,FunType (*compare)(ElemType x,ElemType y));
 };
 //链表表头类模板的构造函数，用于初始化长度和置空指针
 template <typename ElemType>
@@ -103,7 +129,7 @@ template <typename ElemType>
 template <typename Status>
 Status LinkList<ElemType>::ClearList(){
     LNode<ElemType> *tmp=NULL;
-    while(this->tail!=this->head){
+    while(this->head!=NULL){
         tmp=this->head;
         this->head=this->head->next;
         delete tmp;
@@ -127,8 +153,28 @@ Status LinkList<ElemType>::InsFirst(LNode<ElemType> *s){
         this->head=s;
         this->tail=s;
     }
+    this->len++;
     return OK;
 }
+//delete first node
+template <typename ElemType>
+template <typename Status>
+Status LinkList<ElemType>::DelFirst(LNode<ElemType> &q){
+    if(this->head!=NULL){
+        LNode<ElemType> *tmp=new LNode<ElemType>;
+        tmp=this->head;
+        q=*tmp;
+        this->head=this->head->next;
+        delete tmp;
+        tmp=NULL;
+        this->len--;
+        return OK;
+    }
+    else{
+        cout<<"Nothing in List"<<endl;
+        return ERROR;
+    }
+};
 //tail insert node
 template <typename ElemType>
 template <typename Status>
@@ -136,13 +182,148 @@ Status LinkList<ElemType>::Append(LNode<ElemType> *s){
     if(this->tail!=NULL){
         this->tail->next=s;
         this->tail=s;
-        return OK;
     }
     else{
         this->tail=s;
         this->head=this->tail;
+    }
+    this->len++;
+    return OK;
+}
+//remove(change) tail node to p node
+template <typename ElemType>
+template <typename Status>
+Status LinkList<ElemType>::Remove(LNode<ElemType> &p){
+    if(this->tail!=NULL){
+        LNode<ElemType> *tmp=new LNode<ElemType>;
+        tmp=this->tail;
+        *(this->tail)=p;
+        delete tmp;
+        tmp=NULL;
+        this->len--;
         return OK;
     }
+    else{
+        cout<<"Nothing in List"<<endl;
+        return ERROR;
+    }
+}
+//在p指向的node前插入node
+template <typename ElemType>
+template <typename Status>
+Status LinkList<ElemType>::InsBefore(LNode<ElemType> *&p,LNode<ElemType> s){
+    LNode<ElemType> *tmp=new LNode<ElemType>;
+    tmp->data=p->data;
+    tmp->next=p->next;
+    *p=s;
+    p->next=tmp;
+    // p->next->data=tmp.data;
+    // p->next->next=tmp.next;
+    this->len++;
+    return OK;
+}
+//在p指向的node后插入node
+template <typename ElemType>
+template <typename Status>
+Status LinkList<ElemType>::InsAfter(LNode<ElemType> *&p,LNode<ElemType> s){
+    LNode<ElemType> *tmp;
+    tmp=p->next;
+    p->next=&s;
+    s.next=tmp;
+    this->len++;
+    return OK;
+}
+//修改p指向的node的data
+template <typename ElemType>
+template <typename Status>
+Status LinkList<ElemType>::SetCurElem(LNode<ElemType> *&p,ElemType e){
+    p->data=e;
+    return OK;
+}
+//返回p指向node的data
+template <typename ElemType>
+ElemType LinkList<ElemType>::GetCurElem(LNode<ElemType> *p){
+    return p->data;
+}
+//是否为空
+template <typename ElemType>
+template <typename Status>
+Status LinkList<ElemType>::ListEmpty(){
+    return this->head==NULL?ERROR:OK;
+}
+//返回链表长度
+template <typename ElemType>
+int LinkList<ElemType>::ListLength(){
+    return this->len;
+}
+//返回前驱
+template <typename ElemType>
+template <typename Position>
+Position LinkList<ElemType>::PriorPos(LNode<ElemType> p){
+    if(p==this.head){
+        return NULL;
+    }
+    else if(this->head==NULL){
+        return NULL;
+    }
+    else{
+        LNode<ElemType> *tmp;
+        tmp=this->head;
+        while(tmp!=NULL&&tmp->next!=p){
+            tmp=tmp->next;
+        }
+        return tmp;
+    }
+}
+//返回后继
+template <typename ElemType>
+template <typename Position>
+Position LinkList<ElemType>::NextPos(LNode<ElemType> p){
+    return p->next!=NULL?p->next:NULL;
+}
+//locate elempos
+template <typename ElemType>
+template <typename Status>
+Status LinkList<ElemType>::LocatePos(int i,LNode<ElemType> *&q){
+    if(i==this->len){
+        q=this->tail;
+        return OK;
+    }
+    else if(i>0&&i<this->len){
+        LNode<ElemType> *tmp= new LNode<ElemType>;
+        tmp=this->head;
+        for (int j = 1; j < i; j++)
+        {
+            tmp=tmp->next;
+        }
+        q=tmp;
+        return OK;
+    }
+    else if(i==1){
+        q=this->head;
+        return OK;
+    }
+    else{
+        cout<<"Invalid index"<<endl;
+        return ERROR;
+    }  
+}
+//对满足某关系的node定位
+template <typename ElemType>
+template <typename Status,typename FunType>
+Status LinkList<ElemType>::LocateElem(ElemType e,FunType (*compare)(ElemType x,ElemType y)){
+    LNode<ElemType> *tmp=this->head;
+    while (tmp!=NULL)
+    {
+        if((*compare)(tmp->data,e)){
+            tmp=tmp->next;
+        }
+        else{
+            return tmp;
+        }
+    }
+    return NULL;
+    
 }
 //print for test
 template <typename ElemType>
@@ -160,25 +341,59 @@ Status LinkList<ElemType>::PrintList(){
     }
     else{
         cout<<"Nothing in LIST"<<endl;
-        return OK;
+        return ERROR;
     }
-};
+}
+
+//visit()，遍历链表对每个node调用
+//TODO；！！！
+
+
+//compare函数，用来比较关系
+template <typename Status,typename ElemType>
+Status Compare(ElemType x,ElemType y){
+    return x>y?true:false;
+}
+//生成节点函数，测试用
+LNode<int>* NewNodeCreater(){
+    static int x=0;
+    LNode<int> *node=new LNode<int>;
+    node->data=x;
+    x++;
+    return node;
+}
 
 int main(){
-    int i=666;
-    LinkList<int> *List=new LinkList<int> ;
-    // List->mdzz();
-    LNode<int> *node1=new LNode<int>;
-    LNode<int> *node2=new LNode<int>;
-    node2->data=node1->data=23;
-    // cout<<InitList<int>(List)<<endl;
-    // List->InsFirst<int>(node);
-    List->InsFirst<int>(node1);
-    List->Append<int>(node2);
-    List->PrintList<int>();
-    List->ClearList<int>();
-    List->DestoryList<int>();
-    cin>>i;
-    return 0;
+    // int i=666;
+    // int (*compare)(int x,int y);
+    // compare=Compare<int,int>;
+    // LinkList<int> *List=new LinkList<int> ;
+    // LNode<int> *q=new LNode<int>;
+    // LNode<int> *p=new LNode<int>;
+    // LNode<int> *node1=new LNode<int>;
+    // node1=NewNodeCreater();
+    // for(int i=0;i<5;i++){
+    //     List->InsFirst<int>(node1);
+    //     node1=NewNodeCreater();
+    // }
+    // List->DelFirst<int>(*q);
+    // q=NULL;
+    // List->LocatePos<int>(1,p);
+    // List->InsBefore<int>(p,*node1);
+    // node1=NewNodeCreater();
+    // List->LocatePos<int>(2,p);
+    // List->InsAfter<int>(p,*node1);
+    // List->Append<int>(node1);
+    // List->LocatePos<int>(3,p);
+    // List->SetCurElem<int>(p,666);
+    // p=List->LocateElem<LNode<int>*,int>(15,compare);
+    // List->SetCurElem<int>(p,233);
+    // p=NULL;
+    // List->PrintList<int>();
+    // List->ClearList<int>();
+    // List->PrintList<int>();
+    // List->DestoryList<int>();
+    // cin>>i;
+    // return 0;
 }
 
